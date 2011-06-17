@@ -3,6 +3,8 @@ if defined?(Merb::Plugins)
   $:.unshift File.dirname(__FILE__)
 
   dependency 'merb-slices', :immediate => true
+  dependency 'cronedit', '0.3.0'
+  dependency 'git', '1.2.5'
   Merb::Plugins.add_rakefiles "maintainer/merbtasks", "maintainer/slicetasks", "maintainer/spectasks"
 
   # Register the Slice for the current host application
@@ -32,6 +34,10 @@ if defined?(Merb::Plugins)
     
     # Initialization hook - runs before AfterAppLoads BootLoader
     def self.init
+      data_dir = File.join(Merb.root,"slices/maintainer/data")
+      log_dir = File.join(Merb.root,"slices/maintainer/log")
+      Dir.mkdir(data_dir) unless File.exists?(data_dir) and File.directory?(data_dir)
+      Dir.mkdir(log_dir) unless File.exists?(log_dir) and File.directory?(log_dir)
     end
     
     # Activation hook - runs after AfterAppLoads BootLoader
@@ -54,14 +60,7 @@ if defined?(Merb::Plugins)
     def self.setup_router(scope)
       # example of a named route
       # scope.match('/index(.:format)').to(:controller => 'main', :action => 'index').name(:index)
-      scope.match('/maintain/database/:action').to(:controller => 'database')
-      scope.match('/maintain/tasks/:action').to(:controller => 'tasks')
-
-      scope.match('/maintain/deployment').to(:controller => 'deployment', :action => 'index').name(:deployment)
-      scope.match('/maintain/database').to(:controller => 'database', :action => 'index').name(:database)
-      scope.match('/maintain/tasks').to(:controller => 'tasks', :action => 'index').name(:tasks)
-      scope.match('/maintain/history').to(:controller => 'history', :action => 'index').name(:history)
-      scope.match('/maintain/reporting').to(:controller => 'reporting', :action => 'index').name(:reporting)
+      scope.match('/maintain/:controller(/:action)').register
 
       # the slice is mounted at /maintainer - note that it comes before default_routes
       scope.match('/maintain').to(:controller => 'maintain', :action => 'index').name(:maintain)

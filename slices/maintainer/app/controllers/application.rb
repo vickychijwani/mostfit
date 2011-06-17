@@ -1,4 +1,7 @@
 class Maintainer::Application < Merb::Controller
+  require 'slices/maintainer/lib/utils'
+  include Merb::Maintainer::Utils
+
   before :ensure_authenticated
   before :ensure_is_maintainer
 

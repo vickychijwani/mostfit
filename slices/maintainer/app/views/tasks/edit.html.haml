@@ -1,5 +1,10 @@
 #edit-task
-  = partial :fields
+  %form{:action => "/maintain/tasks/update",:method => "POST"}
+    
+    = partial :fields
+    
+    %input{:type => "submit", :value => "Submit"}
+    %input.ajax-fetch{:type => "button", :value => "Cancel", :url => "/maintain/tasks"}
 
 :javascript
-  preselect();
+  preselect_task_schedule();

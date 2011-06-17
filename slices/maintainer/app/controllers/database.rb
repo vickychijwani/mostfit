@@ -1,5 +1,5 @@
 class Maintainer::Database < Maintainer::Application
-  
+
   DUMP_FOLDER = Merb::Maintainer::DatabaseHelper::DUMP_FOLDER
   DB_FOLDER = Merb::Maintainer::DatabaseHelper::DB_FOLDER
 
@@ -45,18 +45,6 @@ class Maintainer::Database < Maintainer::Application
       :name   => file
     })
     send_data(File.open(File.join(Merb.root, DUMP_FOLDER, file)), :filename => file, :type => "bzip2") if file and File.exists?(File.join(Merb.root, DUMP_FOLDER, file))
-  end
-
-  def log(data)
-    h = DataMapper.repository(:maintainer) {
-      Maintainer::HistoryItem.create(
-        :user_name   => session.user.login,
-        :ip          => data[:ip],
-        :time        => Time.now,
-        :action      => data[:action],
-        :data        => data[:name]
-      )
-    }
   end
 
 end

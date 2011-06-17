@@ -20,8 +20,11 @@
         - @tasks.each_with_index do |task,index|
           %tr
             %td= index+1
-            %td= task[:command]
+            %td= task[:rake_task]
             %td= schedule_to_s(task)
             %td
               %a.ajax-fetch{:href => "#", :url => "/maintain/tasks/edit?task=#{@tasks_keys[index]}"} Edit
-              %a.ajax-fetch{:href => "#", :url => "/maintain/tasks/delete?task=#{@tasks_keys[index]}"} Delete
+              |
+              %a{:href => "/maintain/tasks/delete?task=#{@tasks_keys[index]}"} Delete
+  - else
+    You do not have any tasks scheduled.

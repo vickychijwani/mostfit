@@ -11,15 +11,22 @@ class Maintainer::Tasks < Maintainer::Application
   end
 
   def create
-    schedule = create_schedule params
+    schedule = create_schedule(params)
 
-    params["tasks"].each{|task|
-      output_file = "$HOME/cron.log 2>&1"
-      schedule[:command] = "cd #{Merb.root}; $HOME/.rvm/bin/rvm gemset list >> #{output_file}; $HOME/.rvm/rubies/$RUBY_VERSION/bin/gem list >> #{output_file}; #{task} >> #{output_file}"
-      index = (@crontab.list_maintainer.length > 0) ? (@crontab.list_maintainer.keys.sort.last[/\d+/].to_i + 1) : 1
-      @crontab.add("maintainer_#{index}", schedule)
-      @crontab.commit
-    }
+    cron_log = File.join(Merb.root,"slices/maintainer/log/cron.log") + " 2>&1"
+    task = params['task']
+    schedule[:command] = "/bin/bash -l -c 'cd #{Merb.root}; #{task} >> #{cron_log}'"
+
+    index = (@crontab.list_maintainer.length > 0) ? (@crontab.list_maintainer.keys.sort.last[/\d+/].to_i + 1) : 1
+    @crontab.add("maintainer_#{index}", schedule)
+    @crontab.commit
+
+    log({
+      :action => 'created_task',
+      :ip     => request.remote_ip,
+      :name   => params["task"]
+    })
+
     redirect("/maintain#tasks")
   end
 
@@ -30,16 +37,27 @@ class Maintainer::Tasks < Maintainer::Application
   end
 
   def update
-    schedule = create_schedule params
+    schedule = create_schedule(params)
     schedule[:command] = params["task_command"]
     @crontab.add(params["task_name"], schedule)
     @crontab.commit
+    log({
+      :action => 'edited_task',
+      :ip     => request.remote_ip,
+      :name   => @crontab.list_maintainer[params["task_name"]].to_cron_entry[:rake_task]
+    })
     redirect("/maintain#tasks")
   end
 
   def delete
+    task = @crontab.list_maintainer[params[:task]].to_cron_entry[:rake_task]
     @crontab.remove(params[:task])
     @crontab.commit
+    log({
+      :action => 'deleted_task',
+      :ip     => request.remote_ip,
+      :name   => task
+    })
     redirect("/maintain#tasks")
   end
 

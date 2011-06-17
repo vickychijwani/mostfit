@@ -11,7 +11,19 @@ $(function() {
     });
 });
 
-function preselect() {
+function setup_confirmation_handlers() {
+    $("a.confirm").click(function(e) {
+	var r = confirm($(this).attr('message') || "Are you sure?");
+	var that = this;
+	if(r) {
+	    ajax_fetch($(that).attr('url'),handle_notify_and_reload,{url : '/maintain/deployment', success_text : "Rollback successful."});
+	}
+	e.preventDefault();
+	return false;
+    });
+}
+
+function preselect_task_schedule() {
     var components = ["minute", "hour", "day", "month", "weekday"];
     var i = 0;
     for(i=0; i<5; i++) {
@@ -40,16 +52,8 @@ function setup_select_enabler(el) {
 
 function setup_ajax_fetch_handler() {
     $(".ajax-fetch").live('click',function(e) {
-	show_loader($(".tab:visible"));
-	$.ajax({
-	    url : $(this).attr('url'),
-	    success : function(response) {
-		render(response);
-	    },
-	    error : function() {
-		notify({text: "Something went wrong. Please try again after sometime.", dismissable: true});
-	    }
-	});
+	show_loader();
+	ajax_fetch($(this).attr('url'),render);
 	e.preventDefault();
 	return false;
     });
@@ -58,36 +62,58 @@ function setup_ajax_fetch_handler() {
 function setup_snapshot_form_handler() {
     $("#take-snapshot form input").live('click',function(e) {
 	notify({text: "Saving snapshot...", dismissable: false});
-	$.ajax({
-	    url : '/maintain/database/take_snapshot',
-	    success : function(successful) {
-		if(successful == "true")
-		    window.location.reload();
-		else if(successful == "false")
-		    notify({text: "Snapshot could not be saved.", dismissable: true});
-	    },
-	    error : function() {
-		notify({text: "Error in saving snapshot.", dismissable: true});
-	    }
-	});
+	ajax_fetch('/maintain/database/take_snapshot',handle_notify_and_reload,{url : '/maintain/database', success_text : 'Snapshot saved.'});
 	e.preventDefault();
 	return false;
     });
 }
 
-/* ajax loader and rendering functions */
-function show_loader(div) {
-    div.html("<div class='loader'><img src='slices/maintainer/images/progress-dots.gif' /></div>");
+/* various event handlers called by ajax_fetch */
+function handle_notify_and_reload(data) {
+    if(data.response == "true") {
+	notify({text: data.arg.success_text || "Done."});
+	ajax_fetch(data.arg.url,render);
+    }
+    else {
+	notify({text: "An error occurred."});
+    }
 }
-function render(content) {
-    $(".loader").parent().html(content);
+
+function handle_and_reload(data) {
+    if(data.response == "true") {
+	dismiss_notification();
+	ajax_fetch(data.arg.url,render);
+    }
+    else if(data.response == "false") {
+	notify({text: "An error occurred."});
+    }
+}
+function render(data) {
+    $(".tab:visible").html(data.response);
+}
+
+/* ajax fetch, display loader, display response */
+function ajax_fetch(url,handler,extra) {
+    $.ajax({
+	url : url,
+	success : function(response) {
+	    (extra) ? handler({response:response, arg:extra}) : handler({response:response});
+	},
+	error : function() {
+	    notify({text: "An error occurred."});
+	}
+    });
+}
+
+function show_loader() {
+    $(".tab:visible").html("<div class='loader'><img src='slices/maintainer/images/progress-dots.gif' /></div>");
 }
 
 /* notification functions */
 function dismiss_notification() {
     $("#message-inside span").html("");
     $("#message-drawer").hide();
-    $("#overlay").css({'z-index':'-1'}).hide();
+    hide_overlay();
     $("#message-inside .dismiss").remove();
     return false;
 }
@@ -98,12 +124,22 @@ function notify(notification) {
     }
     $("#message-inside span").html(notification.text);
     $("#message-drawer").show();
-    if(notification.dismissable)
-	make_dismissable();
+    if(notification.dismissable == false)
+	show_overlay();
     else
-	$("#overlay").css({'z-index':'998'}).show();
+	make_dismissable();
 }
 
 function make_dismissable() {
-    $("#message-inside").append("<a class='dismiss' href='"+window.location.hash+"' onclick='dismiss_notification()'>x</a>");
+    if($("#message-inside a.dismiss").length == 0)
+	$("#message-inside").append("<a class='dismiss' href='"+window.location.hash+"' onclick='dismiss_notification()'>x</a>");
+}
+
+/* overlay functions */
+function show_overlay() {
+    $("#overlay").css({'z-index':'998'}).show();
+}
+
+function hide_overlay() {
+    $("#overlay").css({'z-index':'-1'}).hide();
 }

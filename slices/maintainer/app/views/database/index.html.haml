@@ -1,7 +1,7 @@
 #take-snapshot
   %form
     %input{:type => "button", :value => "Take Snapshot"}
-    
+%hr    
 #snapshots
   - @snapshots = get_snapshots()
   - if @snapshots.length > 0
@@ -9,14 +9,12 @@
     %table.spacious
       %thead
         %tr
-          %th No.
           %th Filename
           %th Created at
           %th Size (bzipped)
       %tbody
-        - @snapshots.each_with_index do |snapshot,index|
+        - @snapshots.each do |snapshot|
           %tr
-            %td= index+1
             %td= "<a href='/maintain/database/download_dump?file=#{snapshot[:name]}' title='Download this database dump'>#{snapshot[:name]}</a>"
             %td= snapshot[:date].strftime("%l:%M:%S %p, %d %b, %Y")
             %td= "%.2f MB" % (snapshot[:size]/1024.0/1024.0)

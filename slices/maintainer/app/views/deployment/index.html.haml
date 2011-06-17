@@ -1,1 +1,61 @@
-#test{ :style => "height:100px;width:50px;background-color:red;" }
+#branch-data
+  %input{:type => "hidden", :value => @current_branch}
+#deploy
+  %form{:action => "/maintain/deployment/deploy", :method => "POST"}  
+    Branch: 
+    %select{:name => "branch"}
+      - @branches.each do |branch|
+        - if branch == @current_branch
+          %option{:value => branch, :selected => "selected"}= branch
+        - else
+          %option{:value => branch}= branch
+    %br
+    Upgrade Database?
+    %input{:type => "checkbox", :name => "upgrade-db"}
+    %span NOTE: The site will be taken down for a few hours for the database upgrade.
+    %br
+    %input{:type => "submit", :value => "Deploy"}
+
+- @deployments = DataMapper.repository(:maintainer) { Maintainer::DeploymentItem.all(:order => [:time.desc]) }
+- if @deployments.length > 0
+  %hr
+
+  #deployment-log
+    %table.spacious
+      %thead
+        %tr
+          %th Commit SHA Key
+          %th Commit Message
+          %th Deployed on
+          %th
+      %tbody
+        - @deployments.each do |deployment|
+          %tr
+            %td= deployment.sha
+            %td= deployment.message
+            %td= deployment.time.strftime("%l:%M:%S %p, %d %b, %Y")
+            %td
+              %a.confirm{:href => "#", :url => "/maintain/deployment/rollback?sha=#{deployment.sha}", :message => "Are you sure you want to rollback to commit #{deployment.sha.truncate(10)}? (You can undo this by deploying again later.)", :success => "Rollback successful."} Rollback
+
+:javascript
+  $(function() {  
+    $("input[name=upgrade-db]").next("span").hide().end().change(function() {
+      if($(this).filter(":checked").length > 0)
+        $(this).next("span").show();
+      else
+        $(this).next("span").hide();
+    });
+    setup_confirmation_handlers();
+
+    /* check if deployment is possible */
+    $.ajax({
+      url : '/maintain/deployment/check',
+      data : { branch : $("#branch-data input").val() },
+      success : function(response) {
+        if(response == "yes")
+          notify({text : "Deployed code is out of date with the server. Click the \"Deploy\" button below to deploy new code.", dismissable: true});
+        else if(response == "no")
+          notify({text : "Deployed code is up-to-date.", dismissable: true});
+      }
+    });
+  });
