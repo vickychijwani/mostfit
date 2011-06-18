@@ -1,4 +1,4 @@
-- @history_items = DataMapper.repository(:maintainer) { Maintainer::HistoryItem.all(:order => [:time.desc]) }
+- @history_items = DM_REPO.scope { Maintainer::HistoryItem.all(:order => [:time.desc]) }
 
 #history
   - if @history_items.length > 0

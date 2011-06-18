@@ -13,9 +13,9 @@ class Maintainer::Tasks < Maintainer::Application
   def create
     schedule = create_schedule(params)
 
-    cron_log = File.join(Merb.root,"slices/maintainer/log/cron.log") + " 2>&1"
+    output_stream = CRON_LOG + " 2>&1"
     task = params['task']
-    schedule[:command] = "/bin/bash -l -c 'cd #{Merb.root}; #{task} >> #{cron_log}'"
+    schedule[:command] = "/bin/bash -l -c 'cd #{Merb.root}; #{task} >> #{output_stream}'"
 
     index = (@crontab.list_maintainer.length > 0) ? (@crontab.list_maintainer.keys.sort.last[/\d+/].to_i + 1) : 1
     @crontab.add("maintainer_#{index}", schedule)

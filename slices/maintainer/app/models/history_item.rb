@@ -4,12 +4,14 @@ class Maintainer::HistoryItem
   include Merb::Helpers::DateAndTime
   
   ACTIONS = {
-    'took_snapshot'    => 'took a database snapshot',
-    'downloaded_dump'  => 'downloaded a database dump',
-    'created_task'     => 'created a scheduled task',
-    'edited_task'      => 'edited a scheduled task',
-    'deleted_task'     => 'deleted a scheduled task',
-    'deployed'         => 'performed a deployment'
+    'took_snapshot'           => 'took a database snapshot',
+    'downloaded_dump'         => 'downloaded a database dump',
+    'created_task'            => 'created a scheduled task',
+    'edited_task'             => 'edited a scheduled task',
+    'deleted_task'            => 'deleted a scheduled task',
+    'deployed'                => 'performed a deployment',
+    'deployed_and_upgraded'   => 'performed a database upgrade and deployment',
+    'rollback'                => 'performed a rollback'
   }
   
   property :id,         Serial
@@ -22,7 +24,7 @@ class Maintainer::HistoryItem
   def stringify
     desc = "#{user_name} #{ACTIONS[action]} "
     desc += "(#{data}) " if data
-    desc += "from #{ip} <a href='#' title='#{time.strftime("%l:%M:%S %p, %d %b, %Y")}'>#{time_lost_in_words(time).sub(/\.0+/,"")} ago</a>"
+    desc += "from #{ip} <a href='#' title='#{time.strftime(DATE_FORMAT_READABLE)}'>#{time_lost_in_words(time).sub(/\.0+/,"")} ago</a>"
   end
   
 end

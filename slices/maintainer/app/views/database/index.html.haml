@@ -16,7 +16,7 @@
         - @snapshots.each do |snapshot|
           %tr
             %td= "<a href='/maintain/database/download_dump?file=#{snapshot[:name]}' title='Download this database dump'>#{snapshot[:name]}</a>"
-            %td= snapshot[:date].strftime("%l:%M:%S %p, %d %b, %Y")
+            %td= snapshot[:date].strftime(DATE_FORMAT_READABLE)
             %td= "%.2f MB" % (snapshot[:size]/1024.0/1024.0)
   - else
     You have not taken any database snapshots as yet.

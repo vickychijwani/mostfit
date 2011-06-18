@@ -1,10 +1,5 @@
 module Merb::Maintainer::TasksHelper
 
-  require 'slices/maintainer/lib/utils'
-  MONTHS = %w(January February March April May June July August September October November December)
-  WEEKDAYS = %w(Sunday Monday Tuesday Wednesday Thursday Friday Saturday)
-  RAKE_TASKS_FILE = File.join(Merb.root,"slices/maintainer/data/mostfit_rake_tasks")
-
   def get_mostfit_rake_tasks
     rake_tasks = {}
     refresh_rake_tasks_file unless File.exists?(RAKE_TASKS_FILE)

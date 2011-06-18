@@ -11,12 +11,24 @@ $(function() {
     });
 });
 
+/* check if deployment is possible */
+function check_if_deployment_possible() {
+    ajax_fetch('/maintain/deployment/check_if_deployment_possible',function(data) {
+        if(data.response == "true")
+            notify_bottom({text : "Deployed code is out of date with the server."});
+        else if(data.response == "false")
+            notify_bottom({text : "Deployed code is up-to-date."});
+    });
+}
+
 function setup_confirmation_handlers() {
     $("a.confirm").click(function(e) {
 	var r = confirm($(this).attr('message') || "Are you sure?");
 	var that = this;
 	if(r) {
-	    ajax_fetch($(that).attr('url'),handle_notify_and_reload,{url : '/maintain/deployment', success_text : "Rollback successful."});
+	    data = {url : $(that).attr('reload_url'), success_text : $(that).attr('success') || "Success."};
+	    if($(that).attr('callback')) data.callback = $(that).attr('callback');
+	    ajax_fetch($(that).attr('url'),handle,data);
 	}
 	e.preventDefault();
 	return false;
@@ -62,29 +74,20 @@ function setup_ajax_fetch_handler() {
 function setup_snapshot_form_handler() {
     $("#take-snapshot form input").live('click',function(e) {
 	notify({text: "Saving snapshot...", dismissable: false});
-	ajax_fetch('/maintain/database/take_snapshot',handle_notify_and_reload,{url : '/maintain/database', success_text : 'Snapshot saved.'});
+	ajax_fetch('/maintain/database/take_snapshot',handle,{url : '/maintain/database', success_text : 'Snapshot saved.'});
 	e.preventDefault();
 	return false;
     });
 }
 
 /* various event handlers called by ajax_fetch */
-function handle_notify_and_reload(data) {
+function handle(data) {
     if(data.response == "true") {
-	notify({text: data.arg.success_text || "Done."});
+	(data.arg.success_text) ? notify({text: data.arg.success_text || "Done."}) : dismiss_notification();
+	if(data.arg.callback) eval(data.arg.callback);
 	ajax_fetch(data.arg.url,render);
     }
     else {
-	notify({text: "An error occurred."});
-    }
-}
-
-function handle_and_reload(data) {
-    if(data.response == "true") {
-	dismiss_notification();
-	ajax_fetch(data.arg.url,render);
-    }
-    else if(data.response == "false") {
 	notify({text: "An error occurred."});
     }
 }
@@ -119,20 +122,26 @@ function dismiss_notification() {
 }
 
 function notify(notification) {
-    if($("#message-drawer:visible").length > 0) {
+    if($("#message-drawer:visible").length > 0)
 	dismiss_notification();
-    }
+
     $("#message-inside span").html(notification.text);
     $("#message-drawer").show();
+
     if(notification.dismissable == false)
 	show_overlay();
     else
 	make_dismissable();
 }
 
+function notify_bottom(notification) {
+    $("#bottom-message-inside span").html(notification.text);
+    $("#bottom-message-drawer").show();
+}
+
 function make_dismissable() {
     if($("#message-inside a.dismiss").length == 0)
-	$("#message-inside").append("<a class='dismiss' href='"+window.location.hash+"' onclick='dismiss_notification()'>x</a>");
+	$("<a class='dismiss' href='#' onclick='dismiss_notification()'>x</a>").appendTo("#message-inside");
 }
 
 /* overlay functions */

@@ -6,6 +6,11 @@ if defined?(Merb::Plugins)
   dependency 'cronedit', '0.3.0'
   dependency 'git', '1.2.5'
   Merb::Plugins.add_rakefiles "maintainer/merbtasks", "maintainer/slicetasks", "maintainer/spectasks"
+  
+  require 'slices/maintainer/lib/constants.rb'
+  require 'slices/maintainer/lib/utils.rb'
+  include Merb::Maintainer::Constants
+  include Merb::Maintainer::Utils
 
   # Register the Slice for the current host application
   Merb::Slices::register(__FILE__)
@@ -34,14 +39,13 @@ if defined?(Merb::Plugins)
     
     # Initialization hook - runs before AfterAppLoads BootLoader
     def self.init
-      data_dir = File.join(Merb.root,"slices/maintainer/data")
-      log_dir = File.join(Merb.root,"slices/maintainer/log")
-      Dir.mkdir(data_dir) unless File.exists?(data_dir) and File.directory?(data_dir)
-      Dir.mkdir(log_dir) unless File.exists?(log_dir) and File.directory?(log_dir)
+      Dir.mkdir_if_absent(slice_path("data"))
+      Dir.mkdir_if_absent(slice_path("log"))
     end
     
     # Activation hook - runs after AfterAppLoads BootLoader
     def self.activate
+      DM_REPO.scope { Maintainer::DeploymentItem.create_from_last_commit if Maintainer::DeploymentItem.all.empty? }
     end
     
     # Deactivation hook - triggered by Merb::Slices.deactivate(Maintainer)

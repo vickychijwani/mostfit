@@ -8,7 +8,8 @@
     %link{:href => stylesheet_path('master.css'), :type => "text/css", :rel => "stylesheet"}
     %link{:href => "../stylesheets/style.css", :type => "text/css" , :rel => "stylesheet"}
     
-    %script{:src => "../javascripts/jquery.js", :type => "text/javascript"}  
+    %script{:src => "../javascripts/jquery.js", :type => "text/javascript"}
+    %script{:src => javascript_path('notify-osd.js'), :type => "text/javascript"}    
     %script{:src => javascript_path('master.js'), :type => "text/javascript"}
     %script{:src => "../javascripts/application.js", :type => "text/javascript"}
 
@@ -34,3 +35,11 @@
           - url = '/maintain/'+tab
           .tab
             %input{:type => "hidden", :name => "_load_remote", :value => "#{url}"}
+
+    #bottom-message-drawer
+      #bottom-message
+        #bottom-message-inside
+          %span
+
+:javascript
+  check_if_deployment_possible();
