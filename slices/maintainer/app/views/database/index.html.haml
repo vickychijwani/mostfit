@@ -15,7 +15,9 @@
       %tbody
         - @snapshots.each do |snapshot|
           %tr
-            %td= "<a href='/maintain/database/download_dump?file=#{snapshot[:name]}' title='Download this database dump'>#{snapshot[:name]}</a>"
+            %td
+              %a{:name => snapshot[:name], :href => "/maintain/database/download_dump?file=#{snapshot[:name]}", :title => "Download"}= snapshot[:name]
+              = #"<a name href='/maintain/database/download_dump?file=#{snapshot[:name]}' title='Download this database dump'>#{snapshot[:name]}</a>"
             %td= snapshot[:date].strftime(DATE_FORMAT_READABLE)
             %td= "%.2f MB" % (snapshot[:size]/1024.0/1024.0)
   - else

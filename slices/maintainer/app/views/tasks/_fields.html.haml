@@ -1,3 +1,6 @@
+- months = Merb::Maintainer::Constants::MONTHS
+- weekdays = Merb::Maintainer::Constants::WEEKDAYS
+
 - components = %w(minute hour day month weekday)
 - if @task_name
   #task-data
@@ -54,7 +57,7 @@
           %br
           %select{:multiple => "multiple", :name => "month[]", :disabled => "disabled"}
             - (0..11).each do |i|
-              %option{:value => "#{i+1}"}= "#{MONTHS[i]}"
+              %option{:value => "#{i+1}"}= "#{months[i]}"
         %td#weekdays
           %input{:type => "radio", :checked => "checked", :name => "weekdays-selected", :value => "0"} All
           %br
@@ -62,7 +65,7 @@
           %br
           %select{:multiple => "multiple", :name => "weekday[]", :disabled => "disabled"}
             - (0..6).each do |i|
-              %option{:value => "#{i}"}= "#{WEEKDAYS[i]}"
+              %option{:value => "#{i}"}= "#{weekdays[i]}"
 
 :javascript
   $(function() {

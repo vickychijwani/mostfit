@@ -36,7 +36,19 @@
             %td= deployment.message
             %td= deployment.time.strftime(DATE_FORMAT_READABLE)
             %td
-              %a.confirm{:href => "#", :url => "/maintain/deployment/rollback?sha=#{deployment.sha}", :reload_url => "/maintain/deployment", :message => "Are you sure you want to rollback to commit #{deployment.sha.truncate(10)}? (You can undo this by deploying again later.)", :success => "Rollback successful.", :callback => "check_if_deployment_possible()"} Rollback
+              %a.confirm{:href => "#", :url => "/maintain/deployment/rollback?sha=#{deployment.sha}", :reload_url => "/maintain/deployment", :message => "Are you sure you want to rollback to commit #{deployment.sha.truncate(10)}? (You can undo this by deploying again later.)", :success => "Rollback successful.", :callback => "check_if_deployment_possible()", :icon => "slices/maintainer/images/gears.png"} Rollback
+
+  /%br
+  /%br
+  /%hr
+
+  /#rake-tasks
+  /- @rake_tasks = get_mostfit_rake_tasks
+  /Task:
+  /%select{:name => "task"}
+  /- @rake_tasks.each do |task,desc|
+  /%option{:value => task}= task + ' -- ' + desc
+  /%input{:type => "button", :value => "Run this task now"}
 
 :javascript
   $(function() {
@@ -46,5 +58,6 @@
       else
         $(this).next("span").hide();
     });
-    setup_confirmation_handlers();  
+    setup_confirmation_handlers();
+    $("#deployment-log table a.confirm:eq(0)").remove();
   });

@@ -9,6 +9,11 @@ $(function() {
 	uncheck : function() { $(this).removeAttr('checked'); },
 	select : function() { $(this).attr('selected', 'selected'); }
     });
+    $.notify_osd.setup({
+	click_through : false,
+	sticky : true,
+	dismissable : true
+    });
 });
 
 /* check if deployment is possible */
@@ -26,7 +31,7 @@ function setup_confirmation_handlers() {
 	var r = confirm($(this).attr('message') || "Are you sure?");
 	var that = this;
 	if(r) {
-	    data = {url : $(that).attr('reload_url'), success_text : $(that).attr('success') || "Success."};
+	    data = {url : $(that).attr('reload_url'), success_text : $(that).attr('success') || "Success.", icon : $(that).attr('icon') || ""};
 	    if($(that).attr('callback')) data.callback = $(that).attr('callback');
 	    ajax_fetch($(that).attr('url'),handle,data);
 	}
@@ -73,8 +78,9 @@ function setup_ajax_fetch_handler() {
 
 function setup_snapshot_form_handler() {
     $("#take-snapshot form input").live('click',function(e) {
-	notify({text: "Saving snapshot...", dismissable: false});
-	ajax_fetch('/maintain/database/take_snapshot',handle,{url : '/maintain/database', success_text : 'Snapshot saved.'});
+	show_overlay();
+	$.notify_osd.new({text: "Saving snapshot...", icon:"slices/maintainer/images/database.png", sticky: true});
+	ajax_fetch('/maintain/database/take_snapshot',handle,{url : '/maintain/database', success_text : 'Snapshot saved.', icon : 'slices/maintainer/images/database.png', callback : 'hide_overlay()'});
 	e.preventDefault();
 	return false;
     });
@@ -83,12 +89,12 @@ function setup_snapshot_form_handler() {
 /* various event handlers called by ajax_fetch */
 function handle(data) {
     if(data.response == "true") {
-	(data.arg.success_text) ? notify({text: data.arg.success_text || "Done."}) : dismiss_notification();
+	(data.arg.success_text) ? $.notify_osd.new({text: data.arg.success_text || "Done.", icon: data.arg.icon || ""}) : $.notify_osd.dismiss();
 	if(data.arg.callback) eval(data.arg.callback);
 	ajax_fetch(data.arg.url,render);
     }
     else {
-	notify({text: "An error occurred."});
+	$.notify_osd.new({text: "An error occurred."});
     }
 }
 function render(data) {
@@ -103,7 +109,7 @@ function ajax_fetch(url,handler,extra) {
 	    (extra) ? handler({response:response, arg:extra}) : handler({response:response});
 	},
 	error : function() {
-	    notify({text: "An error occurred."});
+	    $.notify_osd.new({text: "An error occurred."});
 	}
     });
 }
@@ -146,7 +152,7 @@ function make_dismissable() {
 
 /* overlay functions */
 function show_overlay() {
-    $("#overlay").css({'z-index':'998'}).show();
+    $("#overlay").css({'z-index':'890'}).show();
 }
 
 function hide_overlay() {

@@ -24,7 +24,7 @@ class Maintainer::HistoryItem
   def stringify
     desc = "#{user_name} #{ACTIONS[action]} "
     desc += "(#{data}) " if data
-    desc += "from #{ip} <a href='#' title='#{time.strftime(DATE_FORMAT_READABLE)}'>#{time_lost_in_words(time).sub(/\.0+/,"")} ago</a>"
+    desc += "from #{ip} <a href='#' title='#{time.strftime(DATE_FORMAT_READABLE)}' class='time'>#{time_lost_in_words(time).sub(/\.0+/,"")} ago</a>"
   end
   
 end

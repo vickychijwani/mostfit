@@ -13,18 +13,20 @@ class Maintainer::Deployment < Maintainer::Application
     @branches = @git.branches.local.map(&:full)
     @current_branch = @git.current_branch
 
-    # take a database backup
     database_backup
 
     if @current_branch == params[:branch]
-      # perform the actual code fetch and merge
-      # NOTE: the git gem's pull erroneously does a fetch. That's why we have to do a merge below.
-      @git.pull('origin', @current_branch)
-      msg = @git.remote('origin').merge('master')
+      branch = @current_branch
     else
-      # TODO: implement branch change
-      # @git.checkout()
+      # branch change
+      branch = params[:branch]
+      @git.checkout(branch)
     end
+
+    # perform the actual code fetch and merge
+    # NOTE: the git gem's pull erroneously does a fetch. That's why we have to do a merge below.
+    @git.pull('origin', branch)
+    msg = @git.remote('origin').merge(branch)
 
     unless msg == "Already up-to-date."
       # record deployment in deployment and action histories
@@ -35,11 +37,17 @@ class Maintainer::Deployment < Maintainer::Application
         :name   => @git.log.first.sha
       })
 
-      # perform optional database upgrade
-      `rake db:autoupgrade` if params[:upgrade_db] == "yes"
-
-      # restart instance
-      `touch tmp/restart.txt`
+      if params[:upgrade_db] == "yes"
+        # take the site offline
+        `touch tmp/stop.txt`
+        # perform database upgrade
+        `rake db:autoupgrade > #{slice_path("log/db_upgrade.log")}`
+        # start it up again
+        `touch tmp/start.txt`
+      else
+        # restart instance
+        `touch tmp/restart.txt`
+      end
 
       refresh_rake_tasks_file
     end
@@ -50,7 +58,7 @@ class Maintainer::Deployment < Maintainer::Application
   def rollback
     @git.reset_hard(@git.gcommit(params[:sha]))
 
-    # remove DeploymentItems from db
+    # remove appropriate DeploymentItems from db
     rollback_to = DM_REPO.scope { Maintainer::DeploymentItem.first(:sha => params[:sha]) }
     commits_to_trash = DM_REPO.scope { Maintainer::DeploymentItem.all(:time.gt => rollback_to.time) }
     commits_to_trash.destroy

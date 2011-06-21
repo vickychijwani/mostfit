@@ -41,6 +41,7 @@ if defined?(Merb::Plugins)
     def self.init
       Dir.mkdir_if_absent(slice_path("data"))
       Dir.mkdir_if_absent(slice_path("log"))
+      Dir.mkdir_if_absent(app_path("tmp"))
     end
     
     # Activation hook - runs after AfterAppLoads BootLoader
