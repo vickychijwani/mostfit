@@ -15,11 +15,9 @@ class Maintainer::Deployment < Maintainer::Application
 
     database_backup
 
-    if @current_branch == params[:branch]
-      branch = @current_branch
-    else
+    branch = params[:branch]
+    unless @current_branch == branch
       # branch change
-      branch = params[:branch]
       @git.checkout(branch)
     end
 
@@ -56,6 +54,10 @@ class Maintainer::Deployment < Maintainer::Application
   end
 
   def rollback
+    deployment = DM_REPO.scope { Maintainer::DeploymentItem.first(:sha => params[:sha]) }
+
+    # checkout to the rollback commit's branch and reset to that commit
+    @git.checkout(deployment.branch) unless deployment.branch == @git.current_branch
     @git.reset_hard(@git.gcommit(params[:sha]))
 
     # remove appropriate DeploymentItems from db
@@ -73,7 +75,7 @@ class Maintainer::Deployment < Maintainer::Application
   end
 
   def create_initial_deployment_item
-    DM_REPO.scope { create_deployment_item_from_last_commit if Maintainer::DeploymentItem.all.length == 0 }
+    DM_REPO.scope { Maintainer::DeploymentItem.create_from_last_commit if Maintainer::DeploymentItem.all.length == 0 }
   end
 
   def check_if_deployment_possible

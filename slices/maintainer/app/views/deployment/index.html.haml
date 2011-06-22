@@ -25,6 +25,7 @@
       %thead
         %tr
           %th SHA
+          %th Branch
           %th Commit Message
           %th Deployed on
           %th
@@ -33,10 +34,11 @@
           %tr
             %td
               %a{:href => "#", :title => deployment.sha}= deployment.sha.truncate(10)
+            %td= deployment.branch
             %td= deployment.message
             %td= deployment.time.strftime(DATE_FORMAT_READABLE)
             %td
-              %a.confirm{:href => "#", :url => "/maintain/deployment/rollback?sha=#{deployment.sha}", :reload_url => "/maintain/deployment", :message => "Are you sure you want to rollback to commit #{deployment.sha.truncate(10)}? (You can undo this by deploying again later.)", :success => "Rollback successful.", :callback => "check_if_deployment_possible()", :icon => "slices/maintainer/images/gears.png"} Rollback
+              %a.confirm{:href => "#", :url => "/maintain/deployment/rollback?sha=#{deployment.sha}", :reload_url => "/maintain/deployment", :message => "Are you sure you want to rollback to commit #{deployment.sha.truncate(10)}? (You can undo this by deploying again later.)", :success => "Rollback successful.", :callback => "check_if_deployment_possible()", :icon => "slices/maintainer/images/gears.png", :before => "show_overlay()"} Rollback
 
   /%br
   /%br
@@ -52,11 +54,12 @@
 
 :javascript
   $(function() {
+    $("#deploy input[type=submit]").click(function() {
+      show_overlay();
+      $.notify_osd.new({ text: "Deploying...", icon: "slices/maintainer/images/gears.png", dismissable: "false" });
+    });
     $("input[name=upgrade_db]").next("span").hide().end().change(function() {
-      if($(this).filter(":checked").length > 0)
-        $(this).next("span").show();
-      else
-        $(this).next("span").hide();
+      ($(this).filter(":checked").length > 0) ? $(this).next("span").show() : $(this).next("span").hide();
     });
     setup_confirmation_handlers();
     $("#deployment-log table a.confirm:eq(0)").remove();

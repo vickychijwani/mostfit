@@ -1,10 +1,24 @@
-- @history_items = DM_REPO.scope { Maintainer::HistoryItem.all(:order => [:time.desc]) }
+- @history_items = DM_REPO.scope { Maintainer::HistoryItem.all(:order => [:time.desc]).paginate(:page => params[:page], :per_page => 15) }
 
 #history
   - if @history_items.length > 0
     %ul
       - @history_items.each do |item|
         %li.history-item= item.stringify
+    #pagination
+      = paginate @history_items
   - else
     %p Any actions performed in Mostfit Maintainer will be logged here.
-      
+
+:javascript
+  $(function() {
+    $('#pagination a').click(function(e) {
+      // make pagination ajaxy
+      var parse_url = /^\/maintainer\/history\?page=(\d+)$/;
+      var res = parse_url.exec($(this).attr('href'));
+      request_url = '/maintain/history?page='+res[1];
+      ajax_fetch(request_url, render);
+      e.preventDefault();
+      return false;
+    });
+  });

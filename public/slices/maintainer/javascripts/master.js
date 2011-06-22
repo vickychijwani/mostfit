@@ -20,9 +20,9 @@ $(function() {
 function check_if_deployment_possible() {
     ajax_fetch('/maintain/deployment/check_if_deployment_possible',function(data) {
         if(data.response == "true")
-            notify_bottom({text : "Deployed code is out of date with the server."});
+            notify_bottom({text : "Deployed code in current branch is out of date with the server."});
         else if(data.response == "false")
-            notify_bottom({text : "Deployed code is up-to-date."});
+            notify_bottom({text : "Deployed code in current branch is up-to-date."});
     });
 }
 
@@ -31,6 +31,7 @@ function setup_confirmation_handlers() {
 	var r = confirm($(this).attr('message') || "Are you sure?");
 	var that = this;
 	if(r) {
+	    show_overlay();
 	    data = {url : $(that).attr('reload_url'), success_text : $(that).attr('success') || "Success.", icon : $(that).attr('icon') || ""};
 	    if($(that).attr('callback')) data.callback = $(that).attr('callback');
 	    ajax_fetch($(that).attr('url'),handle,data);
@@ -79,7 +80,7 @@ function setup_ajax_fetch_handler() {
 function setup_snapshot_form_handler() {
     $("#take-snapshot form input").live('click',function(e) {
 	show_overlay();
-	$.notify_osd.new({text: "Saving snapshot...", icon:"slices/maintainer/images/database.png", sticky: true});
+	$.notify_osd.new({text: "Saving snapshot...", icon:"slices/maintainer/images/database.png", sticky: true, dismissable: false});
 	ajax_fetch('/maintain/database/take_snapshot',handle,{url : '/maintain/database', success_text : 'Snapshot saved.', icon : 'slices/maintainer/images/database.png', callback : 'hide_overlay()'});
 	e.preventDefault();
 	return false;
@@ -88,6 +89,7 @@ function setup_snapshot_form_handler() {
 
 /* various event handlers called by ajax_fetch */
 function handle(data) {
+    hide_overlay();
     if(data.response == "true") {
 	(data.arg.success_text) ? $.notify_osd.new({text: data.arg.success_text || "Done.", icon: data.arg.icon || ""}) : $.notify_osd.dismiss();
 	if(data.arg.callback) eval(data.arg.callback);
@@ -103,6 +105,8 @@ function render(data) {
 
 /* ajax fetch, display loader, display response */
 function ajax_fetch(url,handler,extra) {
+    if(handler == render)
+	show_loader();
     $.ajax({
 	url : url,
 	success : function(response) {

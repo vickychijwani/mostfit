@@ -6,6 +6,7 @@ class Maintainer::DeploymentItem
   property :sha,      String,   :nullable => false, :length => 40
   property :message,  Text,     :nullable => false
   property :time,     DateTime, :nullable => false
+  property :branch,   String,   :nullable => false, :default => "master"
 
   def self.create_from_last_commit
     git = Git.open(GIT_REPO)
@@ -13,7 +14,8 @@ class Maintainer::DeploymentItem
       Maintainer::DeploymentItem.create(
         :sha     => git.log.first.sha,
         :message => git.log.first.message,
-        :time    => Time.now
+        :time    => Time.now,
+        :branch  => git.current_branch
       )
     }
   end

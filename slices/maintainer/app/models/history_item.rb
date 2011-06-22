@@ -23,7 +23,15 @@ class Maintainer::HistoryItem
   
   def stringify
     desc = "#{user_name} #{ACTIONS[action]} "
-    desc += "(#{data}) " if data
+    if data
+      if action == 'deployed' or action == 'deployed_and_upgraded' or action == 'rollback'
+        # deployment = DM_REPO.scope { Maintainer::DeploymentItem.first(:sha => data) }
+        desc += "(<a href='#' title='#{data}'>#{data.truncate(10)}</a> "
+        desc += (deployment) ? "in branch '#{deployment.branch}') " : ") "
+      else
+        desc += "(#{data}) "
+      end
+    end
     desc += "from #{ip} <a href='#' title='#{time.strftime(DATE_FORMAT_READABLE)}' class='time'>#{time_lost_in_words(time).sub(/\.0+/,"")} ago</a>"
   end
   
