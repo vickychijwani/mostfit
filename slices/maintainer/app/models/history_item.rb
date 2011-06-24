@@ -25,7 +25,7 @@ class Maintainer::HistoryItem
     desc = "#{user_name} #{ACTIONS[action]} "
     if data
       if action == 'deployed' or action == 'deployed_and_upgraded' or action == 'rollback'
-        # deployment = DM_REPO.scope { Maintainer::DeploymentItem.first(:sha => data) }
+        deployment = DM_REPO.scope { Maintainer::DeploymentItem.first(:sha => data) }
         desc += "(<a href='#' title='#{data}'>#{data.truncate(10)}</a> "
         desc += (deployment) ? "in branch '#{deployment.branch}') " : ") "
       else
