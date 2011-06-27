@@ -1,6 +1,7 @@
 module Merb
   module Maintainer
     module Constants
+
       SLICE_PATH = 'slices/maintainer/'
 
       DB_CONFIG = YAML.load(File.read(File.join(Merb.root,'config/database.yml')))
@@ -17,6 +18,7 @@ module Merb
       WEEKDAYS = %w(Sunday Monday Tuesday Wednesday Thursday Friday Saturday)
 
       DATE_FORMAT_READABLE = "%l:%M:%S %p, %d %b, %Y"
+
     end
   end
 end

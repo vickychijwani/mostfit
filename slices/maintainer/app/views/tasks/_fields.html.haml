@@ -1,3 +1,5 @@
+%script{:src => javascript_path('tasks.js'), :type => "text/javascript"}
+
 - months = Merb::Maintainer::Constants::MONTHS
 - weekdays = Merb::Maintainer::Constants::WEEKDAYS
 
@@ -66,8 +68,3 @@
           %select{:multiple => "multiple", :name => "weekday[]", :disabled => "disabled"}
             - (0..6).each do |i|
               %option{:value => "#{i}"}= "#{weekdays[i]}"
-
-:javascript
-  $(function() {
-    $("#time-section table input[type=radio]").change(function() { setup_select_enabler($(this).parent()) });
-  });

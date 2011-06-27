@@ -3,8 +3,5 @@
     
     = partial :fields
     
-    %input{:type => "submit", :value => "Submit"}
+    %input.form-submit{:type => "submit", :value => "Submit"}
     %input.ajax-fetch{:type => "button", :value => "Cancel", :url => "/maintain/tasks"}
-
-:javascript
-  preselect_task_schedule();

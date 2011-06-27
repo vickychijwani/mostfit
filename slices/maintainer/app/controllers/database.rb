@@ -11,7 +11,7 @@ class Maintainer::Database < Maintainer::Application
       :ip     => request.remote_ip,
       :name   => File.basename(snapshot_path)
     })
-    "true"
+    (request.xhr?) ? (return "true") : redirect("/maintain#database")
   end
 
   def download_dump(file)
@@ -20,7 +20,8 @@ class Maintainer::Database < Maintainer::Application
       :ip     => request.remote_ip,
       :name   => file
     })
-    send_data(File.open(File.join(DUMP_FOLDER, file)), :filename => file, :type => "bzip2") if file and File.exists?(File.join(DUMP_FOLDER, file))
+    path = File.join(DUMP_FOLDER, file)
+    return send_data(File.open(path), :filename => file, :type => "bzip2") if file and File.exists?(path)
   end
 
 end

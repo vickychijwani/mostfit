@@ -11,6 +11,9 @@ if defined?(Merb::Plugins)
   require 'slices/maintainer/lib/utils.rb'
   include Merb::Maintainer::Constants
   include Merb::Maintainer::Utils
+  include Merb::Maintainer::Utils::Log
+  include Merb::Maintainer::Utils::Database
+  include Merb::Maintainer::Utils::Instance
 
   # Register the Slice for the current host application
   Merb::Slices::register(__FILE__)

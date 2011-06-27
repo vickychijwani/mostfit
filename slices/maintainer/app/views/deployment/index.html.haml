@@ -1,5 +1,8 @@
+%script{:src => javascript_path('deployment.js'), :type => "text/javascript"}
+
 #branch-data
   %input{:type => "hidden", :value => @current_branch}
+
 #deploy
   %form{:action => "/maintain/deployment/deploy", :method => "POST"}  
     Branch: 
@@ -38,7 +41,7 @@
             %td= deployment.message
             %td= deployment.time.strftime(DATE_FORMAT_READABLE)
             %td
-              %a.confirm{:href => "#", :url => "/maintain/deployment/rollback?sha=#{deployment.sha}", :reload_url => "/maintain/deployment", :message => "Are you sure you want to rollback to commit #{deployment.sha.truncate(10)}? (You can undo this by deploying again later.)", :success => "Rollback successful.", :callback => "check_if_deployment_possible()", :icon => "slices/maintainer/images/gears.png", :before => "show_overlay()"} Rollback
+              %a.confirm{:href => "#", :url => "/maintain/deployment/rollback?sha=#{deployment.sha}", :reload_url => "/maintain/deployment", :message => "Are you sure you want to rollback to commit #{deployment.sha.truncate(10)}? (You can undo this by deploying again later.)", :success => "Rollback successful.", :callback => "check_if_deployment_possible()", :icon => "slices/maintainer/images/gears.png", :before => "show_overlay(); $.notify_osd.new({ text:'Rolling back...', icon: $(this).attr('icon'), sticky: true, dismissable: false })"} Rollback
 
   /%br
   /%br
@@ -51,16 +54,4 @@
   /- @rake_tasks.each do |task,desc|
   /%option{:value => task}= task + ' -- ' + desc
   /%input{:type => "button", :value => "Run this task now"}
-
-:javascript
-  $(function() {
-    $("#deploy input[type=submit]").click(function() {
-      show_overlay();
-      $.notify_osd.new({ text: "Deploying...", icon: "slices/maintainer/images/gears.png", dismissable: "false" });
-    });
-    $("input[name=upgrade_db]").next("span").hide().end().change(function() {
-      ($(this).filter(":checked").length > 0) ? $(this).next("span").show() : $(this).next("span").hide();
-    });
-    setup_confirmation_handlers();
-    $("#deployment-log table a.confirm:eq(0)").remove();
-  });
+  
