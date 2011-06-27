@@ -4,19 +4,30 @@
   %input{:type => "hidden", :value => @current_branch}
 
 #deploy
-  %form{:action => "/maintain/deployment/deploy", :method => "POST"}  
-    Branch: 
-    %select{:name => "branch"}
-      - @branches.each do |branch|
-        - if branch == @current_branch
-          %option{:value => branch, :selected => "selected"}= branch
-        - else
-          %option{:value => branch}= branch
+  %form{:action => "/maintain/deployment/deploy", :method => "POST"}
+    #branch-type
+      Deploy a:
+      %input{:type => "radio", :name => "branch_type", :value => "local", :checked => "checked"} local branch  
+      %input{:type => "radio", :name => "branch_type", :value => "remote"} remote branch
     %br
-    Upgrade Database?
-    %input{:type => "checkbox", :name => "upgrade_db", :value => "yes"}
-    %span NOTE: The site will be taken down for a few hours for the database upgrade.
+
+    #branch
+      Branch: 
+      %select#branch-type-local{:name => "local_branch"}
+        - @branches.each do |branch|
+          - if branch == @current_branch
+            %option{:value => branch, :selected => "selected"}= branch
+          - else
+            %option{:value => branch}= branch
+      %input#branch-type-remote{:type => "text", :name => "remote_branch", :style => "display:none;"}
     %br
+
+    #upgrade-db
+      Upgrade Database?
+      %input{:type => "checkbox", :name => "upgrade_db", :value => "yes"}
+      %span NOTE: The site will be taken down for a few hours for the database upgrade.
+    %br
+    
     %input{:type => "submit", :value => "Deploy"}
 
 - @deployments = DM_REPO.scope { Maintainer::DeploymentItem.all(:order => [:time.desc]) }

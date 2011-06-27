@@ -8,18 +8,27 @@ module Merb::Maintainer::DeploymentHelper
 
     database_backup
 
-    branch = params[:branch]
-    unless @current_branch == branch
-      # branch change
+    # fetch all remote branches
+    @git.fetch('origin')
+
+    branch = (params[:branch_type] == "local") ? params[:local_branch] : params[:remote_branch]
+    branch_changed = (@current_branch != branch)
+     
+    if params[:branch_type] == "local"
+      # local branch change
+      @git.checkout(branch) if branch_changed
+      # pull = fetch (done above) + merge (the git gem's pull() method is buggy, DON'T use it)
+      msg = @git.remote('origin').merge(branch)
+    elsif params[:branch_type] == "remote"
+      # switch to the specified remote branch, ...
+      @git.checkout('origin/'+branch)
+      # ... create a corresponding local branch from it, ...
+      @git.branch(branch).create
+      # ... and deploy the new local branch by checking out to it
       @git.checkout(branch)
     end
 
-    # perform the actual code fetch and merge
-    # NOTE: the git gem's pull erroneously does a fetch. That's why we have to do a merge below.
-    @git.pull('origin', branch)
-    msg = @git.remote('origin').merge(branch)
-
-    unless msg == "Already up-to-date."
+    if (params[:branch_type] == "local" and not branch_changed and not msg.nil? and not msg == "Already up-to-date.") or (params[:branch_type] == "local" and branch_changed) or (params[:branch_type] == "remote")
       # record deployment in deployment and action histories
       DM_REPO.scope { Maintainer::DeploymentItem.create_from_last_commit }
       log(
@@ -63,10 +72,9 @@ module Merb::Maintainer::DeploymentHelper
   end
 
   def deployable?
-    Dir.chdir(GIT_REPO)
-    `git remote update`
-    status = (`git rev-list --max-count=1 refs/heads/#{@git.current_branch}` != `git rev-list --max-count=1 refs/remotes/origin/#{@git.current_branch}`)
-    Dir.chdir(Merb.root)
+    repo = File.join(GIT_REPO,".git")
+    `git --git-dir=#{repo} remote update`
+    status = (`git --git-dir=#{repo} rev-list --max-count=1 refs/heads/#{@git.current_branch}` != `git --git-dir=#{repo} rev-list --max-count=1 refs/remotes/origin/#{@git.current_branch}`)
     return status.to_s
   end
 

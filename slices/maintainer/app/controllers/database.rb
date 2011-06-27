@@ -24,4 +24,15 @@ class Maintainer::Database < Maintainer::Application
     return send_data(File.open(path), :filename => file, :type => "bzip2") if file and File.exists?(path)
   end
 
+  def delete(file)
+    path = File.join(DUMP_FOLDER,file)
+    File.delete(path) if file and File.exists?(path)
+    log({
+      :action => 'deleted_dump',
+      :ip     => request.remote_ip,
+      :name   => file
+    })
+    (request.xhr?) ? (return "true") : redirect("/maintain#database")
+  end
+
 end

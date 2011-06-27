@@ -9,11 +9,13 @@ function setup_snapshot_form_handler() {
 	ajax_call({
 	    url: '/maintain/database/take_snapshot',
 	    handler: handle,
-	    extra: {
-		url : '/maintain/database',
-		success_text : 'Snapshot saved.',
-		icon : 'slices/maintainer/images/database.png',
-		callback : 'hide_overlay()'
+	    data: {
+		extra: {
+		    url : '/maintain/database',
+		    success_text : 'Snapshot saved.',
+		    icon : 'slices/maintainer/images/database.png',
+		    callback : 'hide_overlay()'
+		}
 	    }
 	});
 	e.preventDefault();

@@ -1,7 +1,6 @@
 $(function() {
     setup_ajax_fetch_handlers();
     setup_confirmation_handlers();
-    //setup_form_submit_handlers();
     check_if_deployment_possible();
 
     $.fn.extend({
@@ -31,29 +30,15 @@ function check_if_deployment_possible() {
     });
 }
 
-function setup_form_submit_handlers() {
-    $("input.form-submit").live('click',function(e) {
-	ajax_call({
-	    url: $(this).closest("form").attr('action'),
-	    data: $(this).closest("form").serialize(),
-	    handler: handle,
-	    extra: {
-		url: "/maintain/tasks"
-	    }
-	});
-	e.preventDefault();
-	return false;
-    });
-}
-
 function setup_confirmation_handlers() {
     $("a.confirm").live('click',function(e) {
 	var r = confirm($(this).attr('message') || "Are you sure?");
 	var that = this;
 	if(r) {
 	    show_overlay();
-	    data = {url : $(that).attr('reload_url'), success_text : $(that).attr('success') || "Success.", icon : $(that).attr('icon') || ""};
-	    if($(that).attr('callback')) data.callback = $(that).attr('callback');
+	    data = {};
+	    data.extra = {url : $(that).attr('reload_url'), success_text : $(that).attr('success') || "Success.", icon : $(that).attr('icon') || ""};
+	    if($(that).attr('callback')) data.extra.callback = $(that).attr('callback');
 	    ajax_call({
 		url: $(that).attr('url'),
 		handler: handle,
@@ -106,7 +91,7 @@ function ajax_call(params) {
 	url : params.url,
 	data : (params.data) ? (params.data) : (""),
 	success : function(response) {
-	    (params.extra) ? params.handler({response:response, arg:params.extra}) : params.handler({response:response});
+	    (params.data && params.data.extra) ? params.handler({response:response, arg:params.data.extra}) : params.handler({response:response});
 	},
 	error : function() {
 	    hide_overlay();

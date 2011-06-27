@@ -1,5 +1,3 @@
-include Merb::Maintainer::Constants
-
 class Array
   def join_human(separator)
     (self.length > 1) ? (self[0..-2].join(separator) + " and " + self[-1]) : (self.first)
@@ -46,6 +44,8 @@ class CronEdit::Crontab
 end
 
 module Merb::Maintainer::Utils
+  include Merb::Maintainer::Constants
+
   # utility functions related to logging
   module Log
     def log(data)

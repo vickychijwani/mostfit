@@ -116,11 +116,15 @@ input[type=button]:active, input[type=submit]:active {
     font-size:17px;
 }
 /* deployment tab */
-#deploy form input[type=submit] {
-    margin-top:10px;
+#deploy form input[type=radio] {
+    position:relative;
+    top:2px;
 }
-#deploy form select[name=branch] {
-    margin-bottom:10px;
+#deploy form #branch-type-local {
+    height:24px;
+}
+#deploy form #branch-type-remote {
+    height:20px;
 }
 #deployment-log table td:nth-child(4) {
     min-width:180px;

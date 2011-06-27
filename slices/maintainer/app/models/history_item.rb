@@ -6,6 +6,7 @@ class Maintainer::HistoryItem
   ACTIONS = {
     'took_snapshot'           => 'took a database snapshot',
     'downloaded_dump'         => 'downloaded a database dump',
+    'deleted_dump'            => 'deleted a database dump',
     'created_task'            => 'created a scheduled task',
     'edited_task'             => 'edited a scheduled task',
     'deleted_task'            => 'deleted a scheduled task',
