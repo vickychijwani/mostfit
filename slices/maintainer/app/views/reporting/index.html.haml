@@ -1,0 +1,12 @@
+%script{:type => "text/javascript", :src => "javascripts/swfobject.js"}
+
+#metrics
+  %ul.accordion
+    %li.section
+      .section-title Centers
+      .section-content
+        %ul
+          %li Cumulative Growth
+
+#graph
+  = chart('/maintain/reporting/one', 800, 300)

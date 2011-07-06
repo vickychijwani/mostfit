@@ -187,6 +187,22 @@ input[type=button]:active, input[type=submit]:active {
     text-align:right;
 }
 
+/* reporting tab */
+#metrics {
+    position:relative;
+    float:left;
+    height:100%;
+    width:150px;
+}
+#metrics ul {
+    -webkit-padding-start:0;
+}
+#graph {
+    position:relative;
+    height:100%;
+    margin-left:170px;
+}
+
 /* overlay */
 #overlay {
     position:absolute;
@@ -250,6 +266,7 @@ input[type=button]:active, input[type=submit]:active {
     position:relative !important;
     padding:20px;
     z-index:10 !important;
+    clear:both;
 }
 .tabs {
     margin-top:0 !important;
