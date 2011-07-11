@@ -10,10 +10,13 @@ $(function() {
 	uncheck : function() { $(this).removeAttr('checked'); },
 	select : function() { $(this).attr('selected', 'selected'); }
     });
+
+    // default settings for notifications
     $.notify_osd.setup({
 	click_through : false,
-	sticky : true,
-	dismissable : true
+	sticky : false,
+	dismissable : true,
+	timeout : 10
     });
 });
 

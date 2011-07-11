@@ -71,6 +71,7 @@ module Merb::Maintainer::DeploymentHelper
     )
   end
 
+  # checks whether the currently deployed is behind or up-to-date with the corresponding remote branch
   def deployable?
     repo = File.join(GIT_REPO,".git")
     `git --git-dir=#{repo} remote update`

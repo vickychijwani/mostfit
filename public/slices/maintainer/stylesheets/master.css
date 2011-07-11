@@ -156,6 +156,12 @@ input[type=button]:active, input[type=submit]:active {
     float:left;
     margin-right:5px;
 }
+#time-section #schedule-type {
+    margin-top:5px;
+}
+#time-section #schedule-simple select {
+    margin:10px 0px;
+}
 #time-section span {
     padding-bottom:20px !important;
 }

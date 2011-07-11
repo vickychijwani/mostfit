@@ -44,15 +44,27 @@ module Merb::Maintainer::TasksHelper
     })
   end
 
+  private
   # creates a schedule hash using information in params (used to parse schedule form data from the view side)
   def create_schedule(params)
-    schedule = {
-      :minute => (params["minutes-selected"] == "0") ?  "*" : params["minute"].join(","),
-      :hour => (params["hours-selected"] == "0") ?  "*" : params["hour"].join(","),
-      :day => (params["days-selected"] == "0") ?  "*" : params["day"].join(","),
-      :month => (params["months-selected"] == "0") ?  "*" : params["month"].join(","),
-      :weekday => (params["weekdays-selected"] == "0") ?  "*" : params["weekday"].join(",")
-    }
+    schedule = case params["schedule-type"]
+    when "simple"
+      case params["schedule-simple"]
+      when "hourly"  then {:minute => "0", :hour => "*", :day => "*", :month => "*", :weekday => "*"}
+      when "daily"   then {:minute => "0", :hour => "0", :day => "*", :month => "*", :weekday => "*"}
+      when "weekly"  then {:minute => "0", :hour => "0", :day => "*", :month => "*", :weekday => "0"}
+      when "monthly" then {:minute => "0", :hour => "0", :day => "1", :month => "*", :weekday => "*"}
+      end
+    when "custom"
+      {
+        :minute => (params["minutes-selected"] == "0") ?  "*" : params["minute"].join(","),
+        :hour => (params["hours-selected"] == "0") ?  "*" : params["hour"].join(","),
+        :day => (params["days-selected"] == "0") ?  "*" : params["day"].join(","),
+        :month => (params["months-selected"] == "0") ?  "*" : params["month"].join(","),
+        :weekday => (params["weekdays-selected"] == "0") ?  "*" : params["weekday"].join(",")
+      }
+    end
+    return schedule
   end
 
   # returns a list of all rake tasks in the mostfit namespace, and creates a (sort of) cache of them in RAKE_TASKS_FILE

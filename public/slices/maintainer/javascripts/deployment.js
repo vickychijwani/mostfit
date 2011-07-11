@@ -10,7 +10,6 @@ $(function() {
 
     $("input[name=branch_type]").change(function() {
 	var branch_type = $("input[name=branch_type]:checked").val();
-	console.log(branch_type);
 	$("[name$=branch]").hide();
 	$("#branch-type-"+branch_type).show();
     });
